@@ -1,5 +1,5 @@
 # tkinterDnD
-A nice wrapper around the tkdnd package
+A nice wrapper around the tkdnd package. No tcl installation, no build isrequired, just download and use it! (Nevertheless, I recommend having tcl installed 😉️)
 
 ### Credits:
 
