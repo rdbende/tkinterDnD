@@ -1,5 +1,5 @@
 # tkinterDnD
-A nice wrapper around the tkdnd package. No tcl installation, no build isrequired, just download and use it! (Nevertheless, I recommend having tcl installed 😉️)
+A nice wrapper around the tkdnd package. No tcl installation, no build is required, just download and use it! (Nevertheless, I recommend having tcl installed 😉️)
 
 ### Credits:
 
@@ -9,6 +9,13 @@ Copyright (c) 2012-2020 Petasis - the tkdnd package
 Copyright (c) 2020 Philippe Gagné - for Mac binaries: https://github.com/pmgagne/tkinterdnd2/tree/master/tkinterdnd2/tkdnd/osx64
 Copyright (c) 2017 Michael Lange - the TkinterDnD package
 ```
+### Install
+The Pypi name is python-tkdnd, because tkinterDnD was already taken, but you can import it with `import tkinterDnD`
+
+```pip install python-tkdnd```\
+or\
+```pip3 install python-tkdnd```
+
 <br>
 
 There's also an example program on how to use drag from and drop to events\
