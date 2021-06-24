@@ -1,6 +1,7 @@
 # tkinterDnD
 A nice wrapper around the tkdnd package. No tcl installation, no build is required, just download and use it! (Nevertheless, I recommend having tcl installed 😉️)
 
+
 ### Credits:
 
 ```
@@ -12,9 +13,13 @@ Copyright (c) 2017 Michael Lange - the TkinterDnD package
 ### Install
 The Pypi name is python-tkdnd, because tkinterDnD was already taken, but you can import it with `import tkinterDnD`
 
-```pip install python-tkdnd```\
-or\
-```pip3 install python-tkdnd```
+```
+pip install python-tkdnd
+```
+or
+```
+pip3 install python-tkdnd
+```
 
 <br>
 
