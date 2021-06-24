@@ -141,7 +141,7 @@ class DnDWrapper:
             try:
                 button = int(button)
             except ValueError:
-                dndtypes = (button,) + dndtypes
+                dndtypes = (button, ) + dndtypes
                 button = 1
 
         self.tk.call("tkdnd::drag_source", "register", self._w, dndtypes, button)
