@@ -7,6 +7,7 @@ setup(
     author="rdbende",
     author_email="rdbende@gmail.com",
     url="https://github.com/rdbende/tkinterDnD",
+    install_requires=['ttkwidgets>=0.11.0'],
     python_requires='>=3.6',
     packages=["tkinterDnD"],
     package_data={"tkinterDnD": ["windows/*", "linux/*", "mac/*"]}
