@@ -1,31 +1,10 @@
 """
 Author: rdbende
 License: MIT license
-Copyright: 2017 Michael Lange, 2012-2020 Petasis, 2021 rdbende
+Copyright: 2017 Michael Lange, 2021 rdbende
 """
 
 import tkinter as tk
-from glob import glob
-import os.path
-
-
-def  _init_tkdnd(master):
-    platform = master.tk.call("tk", "windowingsystem")
-
-    if platform == "win32": folder = "windows"
-    elif platform == "x11": folder = "linux"
-    elif platform == "aqua": folder = "mac"
-
-    package_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), folder)
-
-    TkDnDVersion = master.tk.call("source", os.path.join(package_dir, "pkgIndex.tcl"))
-
-    master.tk.call("source",  os.path.join(package_dir, "tkdnd.tcl"))
-
-    for file in glob(os.path.join(package_dir, "*tkdnd*" + master.tk.call("info", "sharedlibextension"))):
-        master.tk.call("tkdnd::initialise", package_dir, os.path.join(os.path.basename(file)), "tkdnd")
-
-    return TkDnDVersion
 
 
 class DnDEvent:
@@ -74,10 +53,17 @@ class DnDWrapper:
                 return arg
 
         def splitlist_event(arg):
-            try:
-                return self.tk.splitlist(arg)
-            except ValueError:
-                return arg
+            if "color" in args[12]: # Slice 12 is event.type
+                return splitlist_color(arg)
+            else:
+                try:
+                    return self.tk.splitlist(arg)
+                except ValueError:
+                    return arg
+            
+        def splitlist_color(arg):
+            """If the drop type is color converts it to hex"""
+            return ("#" + "".join(i[4:] for i in self.tk.splitlist(arg)))[:7]
 
         A, a, b, C, c, CST, CTT, D, e, L, m, ST, T, t, TT, W, X, Y = args
         event = DnDEvent()
@@ -89,7 +75,7 @@ class DnDWrapper:
         event.codes = splitlist_event(c)
         event.commonsourcetypes = splitlist_event(CST)
         event.commontargettypes = splitlist_event(CTT)
-        event.data = D
+        event.data = splitlist_event(D)
         event.name = e
         event.types = splitlist_event(L)
         event.modifiers = splitlist_event(m)
@@ -125,9 +111,66 @@ class DnDWrapper:
     tk.BaseWidget._dnd_bind = _dnd_bind
 
     def dnd_bind(self, sequence=None, func=None, add=None):
+        """
+        Overwrites the tk.BaseWidget.bind method
+        so we don't have to use a separate method for regular and
+        dnd binding, simply checks which one to call,
+        and if a dnd sequence is specified, and converts the simple
+        and clear tkinterDnD events to tkdnd events
+        
+        Original tkdnd events:
+        
+        <<Drop>>
+        <<Drop:DND_Files>>
+        <<Drop:DND_Text>>
+        <<Drop:DND_Color>>
+        <<DragInitCmd>>
+        <<DragEndCmd>>
+        <<DropEnter>>
+        <<DropLeave>>
+        <<DropPosition>>
+        
+        Simple and clear tkinterDnD events:
+        
+        <<Drop:File>>
+        <<Drop:Text>>
+        <<Drop:Color>>
+        <<Drop:Any>>
+        <<DragStart>>
+        <<DragEnd>>
+        <<DragEnter>>
+        <<DragLeave>>
+        <<DragMove>>
+        """
+        
         bind_func = self._bind
-        if sequence in {"<<DropEnter>>", "<<DropPosition>>", "<<DropLeave>>", "<<Drop>>",
-                        "<<Drop:DND_Files>>", "<<Drop:DND_Text>>", "<<DragInitCmd>>", "<<DragEndCmd>>"}:
+        if sequence in {"<<DropEnter>>", "<<DropPosition>>",
+                        "<<DropLeave>>", "<<Drop>>", "<<Drop:DND_Files>>",
+                        "<<Drop:DND_Text>>", "<<Drop:DND_Color>>",
+                        "<<DragInitCmd>>", "<<DragEndCmd>>", "<<Drop:File>>",
+                        "<<Drop:Text>>", "<<Drop:Color>>", "<<Drop:Any>>",
+                        "<<DragStart>>", "<<DragEnd>>", "<<DragEnter>>",
+                        "<<DragLeave>>", "<<DragMove>>"}:
+            
+            if sequence == "<<Drop:File>>":
+                sequence = "<<Drop:DND_Files>>"
+            elif sequence == "<<Drop:Text>>":
+                sequence = "<<Drop:DND_Text>>"
+            elif sequence == "<<Drop:Color>>":
+                sequence = "<<Drop:DND_Color>>"
+            elif sequence == "<<Drop:Any>>":
+                sequence = "<<Drop:*>>"
+            elif sequence == "<<DragStart>>":
+                sequence = "<<DragInitCmd>>"
+            elif sequence == "<<DragEnd>>":
+                sequence = "<<DragEndCmd>>"
+            elif sequence == "<<DragEnter>>":
+                sequence = "<<DragEnter>>"
+            elif sequence == "<<DropLeave>>":
+                sequence = "<<DropLeave>>"
+            elif sequence == "<<DragMove>>":
+                sequence = "<<DropPosotion>>"
+            
             bind_func = self._dnd_bind
 
         return bind_func(("bind", self._w), sequence, func, add)
@@ -135,6 +178,7 @@ class DnDWrapper:
     tk.BaseWidget.bind = dnd_bind
 
     def register_drag_source(self, button=None, *dndtypes):
+        """Registers the widget as drag source"""
         if button is None:
             button = 1
         else:
@@ -149,16 +193,19 @@ class DnDWrapper:
     tk.BaseWidget.register_drag_source = register_drag_source
 
     def unregister_drag_source(self):
+        """Unregisters the widget from drag source"""
         self.tk.call("tkdnd::drag_source", "unregister", self._w)
 
     tk.BaseWidget.unregister_drag_source = unregister_drag_source
 
     def register_drop_target(self, *dndtypes):
+        """Registers the widget as drop target"""
         self.tk.call("tkdnd::drop_target", "register", self._w, dndtypes)
 
     tk.BaseWidget.register_drop_target = register_drop_target
 
     def unregister_drop_target(self):
+        """Unregisters the widget from drop target"""
         self.tk.call("tkdnd::drop_target", "unregister", self._w)
 
     tk.BaseWidget.unregister_drop_target = unregister_drop_target
@@ -182,9 +229,3 @@ class DnDWrapper:
         self.tk.call("tkdnd::SetDropFileTempDirectory", tempdir)
 
     tk.BaseWidget.set_dropfile_tempdir = set_dropfile_tempdir
-
-
-class Tk(tk.Tk, DnDWrapper):
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
-        self.TkDnDVersion = _init_tkdnd(self)

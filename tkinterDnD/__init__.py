@@ -1,4 +1,6 @@
 from .dnd import *
+from .hook import *
+from .tk import Tk
 
 PRIVATE = 'private'
 NONE = 'none'
@@ -8,8 +10,9 @@ MOVE = 'move'
 LINK = 'link'
 REFUSE_DROP = 'refuse_drop'
 
-TEXT = 'DND_Text'
 FILE = 'DND_Files'
+TEXT = 'DND_Text'
+COLOR = 'DND_Color'
 ALL = '*'
 CF_UNICODETEXT = 'CF_UNICODETEXT'
 CF_TEXT = 'CF_TEXT'

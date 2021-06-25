@@ -1,42 +1,40 @@
 import tkinter as tk
+from tkinter import ttk
 import tkinterDnD
 
 
 root = tkinterDnD.Tk()
 root.title("tkinterDnD example")
-root.geometry("300x300")
 
 stringvar = tk.StringVar()
-stringvar.set('Drop Here...')
+stringvar.set('Drop here or drag from here!')
 
 
 def drop(event):
     stringvar.set(event.data)
-    drop_label.config(bg="#ccc")
-
-def drop_enter(event):
-    drop_label.config(bg="#777")
-
-def drop_leave(event):
-    drop_label.config(bg="#ccc")
+    if "color" in event.type:
+        label_1.config(bg=event.data)
     
 def drag_command(event):
-    return (tkinterDnD.COPY, tkinterDnD.TEXT, "A nice little dragged text")
+    return (tkinterDnD.COPY, "DND_Text", "Some nice dragged text!")
 
 
-drop_label = tk.Label(root, textvar=stringvar, bg="#ccc", relief="solid")
-drop_label.pack(fill="both", expand=True, padx=10, pady=10)
-drop_label.register_drop_target(tkinterDnD.FILE)
+# Without DnD hook you need to register the widget for every purpose,
+# and bind it to the function you want to call
+label_1 = tk.Label(root, textvar=stringvar, relief="solid")
+label_1.pack(fill="both", expand=True, padx=10, pady=10)
+label_1.register_drop_target("*")
+label_1.register_drag_source("*")
+label_1.bind("<<Drop>>", drop)
+label_1.bind("<<DragInitCmd>>", drag_command)
 
-drop_label.bind('<<DropEnter>>', drop_enter)
-drop_label.bind('<<DropLeave>>', drop_leave)
-drop_label.bind('<<Drop>>', drop)
 
-drag_label = tk.Label(root, text="Drag from here!", bg="#ccc", relief="solid")
-drag_label.pack(fill="both", expand=True, padx=10, pady=10)
-drag_label.register_drag_source(tkinterDnD.TEXT)
-
-drag_label.bind('<<DragInitCmd>>', drag_command)
+# With DnD hook you just pass the command to the needed argument,
+# and tkinterDnD will take care of the rest
+# NOTE: You need a ttk widget to use these arguments
+label_2 = ttk.Label(root, ondrop=drop, ondragstart=drag_command,
+                    textvar=stringvar, padding=50, relief="solid")
+label_2.pack(fill="both", expand=True, padx=10, pady=10)
 
 
 root.mainloop()
