@@ -60,11 +60,15 @@ namespace eval xdnd {
 # ----------------------------------------------------------------------------
 #  Command xdnd::HandleXdndEnter
 # ----------------------------------------------------------------------------
-proc xdnd::HandleXdndEnter { path drag_source typelist } {
+proc xdnd::HandleXdndEnter { path drag_source typelist time { data {} } } {
   variable _pressedkeys
   variable _actionlist
+  variable _typelist
   set _pressedkeys 1
   set _actionlist  { copy move link ask private }
+  set _typelist    $typelist
+  # puts "xdnd::HandleXdndEnter: $time"
+  ::tkdnd::generic::SetDroppedData $data
   ::tkdnd::generic::HandleEnter $path $drag_source $typelist $typelist \
            $_actionlist $_pressedkeys
 };# xdnd::HandleXdndEnter
@@ -72,10 +76,16 @@ proc xdnd::HandleXdndEnter { path drag_source typelist } {
 # ----------------------------------------------------------------------------
 #  Command xdnd::HandleXdndPosition
 # ----------------------------------------------------------------------------
-proc xdnd::HandleXdndPosition { drop_target rootX rootY {drag_source {}} } {
+proc xdnd::HandleXdndPosition { drop_target rootX rootY time {drag_source {}} } {
   variable _pressedkeys
+  variable _typelist
   variable _last_mouse_root_x; set _last_mouse_root_x $rootX
   variable _last_mouse_root_y; set _last_mouse_root_y $rootY
+  # puts "xdnd::HandleXdndPosition: $time"
+  ## Get the dropped data...
+  catch {
+    ::tkdnd::generic::SetDroppedData [GetPositionData $drop_target $_typelist $time]
+  }
   ::tkdnd::generic::HandlePosition $drop_target $drag_source \
                                    $_pressedkeys $rootX $rootY
 };# xdnd::HandleXdndPosition
@@ -95,18 +105,27 @@ proc xdnd::HandleXdndDrop { time } {
   variable _last_mouse_root_x
   variable _last_mouse_root_y
   ## Get the dropped data...
-  ::tkdnd::generic::SetDroppedData [GetDroppedData $time]
+  ::tkdnd::generic::SetDroppedData [GetDroppedData \
+    [::tkdnd::generic::GetDragSource] [::tkdnd::generic::GetDropTarget] \
+    [::tkdnd::generic::GetDragSourceCommonTypes] $time]
   ::tkdnd::generic::HandleDrop {} {} $_pressedkeys \
                                $_last_mouse_root_x $_last_mouse_root_y $time
 };# xdnd::HandleXdndDrop
 
 # ----------------------------------------------------------------------------
-#  Command xdnd::_GetDroppedData
+#  Command xdnd::GetPositionData
 # ----------------------------------------------------------------------------
-proc xdnd::GetDroppedData { time } {
-  set _drag_source              [::tkdnd::generic::GetDragSource]
-  set _drop_target              [::tkdnd::generic::GetDropTarget]
-  set _common_drag_source_types [::tkdnd::generic::GetDragSourceCommonTypes]
+proc xdnd::GetPositionData { drop_target typelist time } {
+  foreach {drop_target common_drag_source_types common_drop_target_types} \
+    [::tkdnd::generic::FindWindowWithCommonTypes $drop_target $typelist] {break}
+  GetDroppedData [::tkdnd::generic::GetDragSource] $drop_target \
+    $common_drag_source_types $time
+};# xdnd::GetPositionData
+
+# ----------------------------------------------------------------------------
+#  Command xdnd::GetDroppedData
+# ----------------------------------------------------------------------------
+proc xdnd::GetDroppedData { _drag_source _drop_target _common_drag_source_types time } {
   if {![llength $_common_drag_source_types]} {
     error "no common data types between the drag source and drop target widgets"
   }
@@ -200,7 +219,7 @@ proc xdnd::normalise_data { type data } {
     }
     text/uri-list* {
       if {[catch {
-            encoding convertfrom utf-8 [tkdnd::bytes_to_string $data
+            encoding convertfrom utf-8 [tkdnd::bytes_to_string $data]
           } string]} {
         set string $data
       }
@@ -210,6 +229,7 @@ proc xdnd::normalise_data { type data } {
       foreach quoted_file [split $string] {
         set file [tkdnd::urn_unquote $quoted_file]
         switch -glob $file {
+          \#*       {}
           file://*  {lappend files [string range $file 7 end]}
           ftp://*   -
           https://* -
@@ -704,7 +724,7 @@ proc xdnd::_SendData {type offset bytes args} {
   set typed_data [lindex $_dodragdrop_data $index]
   set format 8
   if {$offset == 0} {
-    ## Prepare the data to be transfered...
+    ## Prepare the data to be transferred...
     switch -glob $type {
       text/plain* - UTF8_STRING - STRING - TEXT - COMPOUND_TEXT {
         binary scan [encoding convertto utf-8 $typed_data] \

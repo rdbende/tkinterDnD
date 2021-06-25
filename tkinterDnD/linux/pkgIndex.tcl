@@ -2,8 +2,10 @@
 # Tcl package index file
 #
 
-set dir "/home/benedek/.local/lib/python3.8/site-packages/TkinterDND/"
-
-package ifneeded tkdnd 2.8 \
+package ifneeded tkdnd 2.9.2 \
   "source \{$dir/tkdnd.tcl\} ; \
-   tkdnd::initialise \{$dir\} libtkdnd2.8.so tkdnd"
+   tkdnd::initialise \{$dir\} libtkdnd2.9.2.so tkdnd"
+
+package ifneeded tkdnd::utils 2.9.2 \
+  "source \{$dir/tkdnd_utils.tcl\} ; \
+   package provide tkdnd::utils 2.9.2"
