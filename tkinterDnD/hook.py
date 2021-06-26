@@ -11,14 +11,15 @@ HOOK_OPTIONS = {"onfiledrop": None, "ontextdrop": None, "oncolordrop": None, "on
                 "ondragstart": None, "ondragend": None, "ondragenter": None,
                 "ondragleave": None, "ondragmove": None}
 
-def dnd_options_hook(self, option, value):
+
+def dnd_options_hook(self, option, value) -> None:
     if option in HOOK_OPTIONS:
         dnd_hook_bind(self, option, value)
-    else: # This isn't really necessary, but it's good to have
+    else:  # This isn't really necessary, but it's good to have
         raise RuntimeError(f"Invalid tkinterDnD hook option: '{option}'")
-    
 
-def dnd_hook_bind(self, option, value):
+
+def dnd_hook_bind(self, option, value) -> None:
     if callable(value):
         if option == "onfiledrop":
             self.bind("<<Drop:File>>", value)

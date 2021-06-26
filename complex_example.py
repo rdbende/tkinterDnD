@@ -38,3 +38,4 @@ label_2.pack(fill="both", expand=True, padx=10, pady=10)
 
 
 root.mainloop()
+

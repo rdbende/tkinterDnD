@@ -46,6 +46,8 @@ class DnDWrapper:
         if len(args) != len(self._subst_format_dnd):
             return args
 
+        action, actions, button, code, codes, cm_src_types, cm_trgt_types, data, name, types, modifiers, sp_src_types, type, src_types, sp_trgt_types, widget, x, y = args
+
         def getint_event(arg):
             try:
                 return int(arg)
@@ -53,44 +55,46 @@ class DnDWrapper:
                 return arg
 
         def splitlist_event(arg):
-            if "color" in args[12]: # Slice 12 is event.type
+            try:
+                return self.tk.splitlist(arg)
+            except ValueError:
+                return arg
+
+        def proc_data(arg):
+            if "color" in type:
                 return splitlist_color(arg)
             else:
-                try:
-                    return self.tk.splitlist(arg)
-                except ValueError:
-                    return arg
-            
+                return arg
+
         def splitlist_color(arg):
             """If the drop type is color converts it to hex"""
             return ("#" + "".join(i[4:] for i in self.tk.splitlist(arg)))[:7]
 
-        A, a, b, C, c, CST, CTT, D, e, L, m, ST, T, t, TT, W, X, Y = args
         event = DnDEvent()
 
-        event.action = A
-        event.actions = splitlist_event(a)
-        event.button = getint_event(b)
-        event.code = C
-        event.codes = splitlist_event(c)
-        event.commonsourcetypes = splitlist_event(CST)
-        event.commontargettypes = splitlist_event(CTT)
-        event.data = splitlist_event(D)
-        event.name = e
-        event.types = splitlist_event(L)
-        event.modifiers = splitlist_event(m)
-        event.supportedsourcetypes = splitlist_event(ST)
-        event.sourcetypes = splitlist_event(t)
-        event.type = T
-        event.supportedtargettypes = splitlist_event(TT)
+        event.action = action
+        event.actions = splitlist_event(actions)
+        event.button = getint_event(button)
+        event.code = code
+        event.codes = splitlist_event(codes)
+        event.commonsourcetypes = splitlist_event(cm_src_types)
+        event.commontargettypes = splitlist_event(cm_trgt_types)
+        event.data = proc_data(data)
+        event.name = name
+        event.modifiers = splitlist_event(modifiers)
+        event.sourcetypes = splitlist_event(src_types)
+        event.supportedsourcetypes = splitlist_event(sp_src_types)
+        event.supportedtargettypes = splitlist_event(sp_trgt_types)
+        event.type = type
+        event.types = splitlist_event(types)
         try:
-            event.widget = self.nametowidget(W)
+            event.widget = self.nametowidget(widget)
         except KeyError:
-            event.widget = W
-        event.x_root = getint_event(X)
-        event.y_root = getint_event(Y)
+            event.widget = widget
+        event.x_root = getint_event(x)
+        event.y_root = getint_event(y)
 
-        return (event, ) # It must be an iterable
+        return (event, )  # It must be an iterable
 
     tk.BaseWidget._substitute_dnd = _substitute_dnd
 
@@ -117,9 +121,9 @@ class DnDWrapper:
         dnd binding, simply checks which one to call,
         and if a dnd sequence is specified, and converts the simple
         and clear tkinterDnD events to tkdnd events
-        
+
         Original tkdnd events:
-        
+
         <<Drop>>
         <<Drop:DND_Files>>
         <<Drop:DND_Text>>
@@ -129,9 +133,9 @@ class DnDWrapper:
         <<DropEnter>>
         <<DropLeave>>
         <<DropPosition>>
-        
+
         Simple and clear tkinterDnD events:
-        
+
         <<Drop:File>>
         <<Drop:Text>>
         <<Drop:Color>>
@@ -142,7 +146,7 @@ class DnDWrapper:
         <<DragLeave>>
         <<DragMove>>
         """
-        
+
         bind_func = self._bind
         if sequence in {"<<DropEnter>>", "<<DropPosition>>",
                         "<<DropLeave>>", "<<Drop>>", "<<Drop:DND_Files>>",
@@ -150,8 +154,8 @@ class DnDWrapper:
                         "<<DragInitCmd>>", "<<DragEndCmd>>", "<<Drop:File>>",
                         "<<Drop:Text>>", "<<Drop:Color>>", "<<Drop:Any>>",
                         "<<DragStart>>", "<<DragEnd>>", "<<DragEnter>>",
-                        "<<DragLeave>>", "<<DragMove>>"}:
-            
+                        "<<DragLeave>>", "<<DragMove>>", "<<DragCursorFeedback>>"}:
+
             if sequence == "<<Drop:File>>":
                 sequence = "<<Drop:DND_Files>>"
             elif sequence == "<<Drop:Text>>":
@@ -170,7 +174,7 @@ class DnDWrapper:
                 sequence = "<<DropLeave>>"
             elif sequence == "<<DragMove>>":
                 sequence = "<<DropPosotion>>"
-            
+
             bind_func = self._dnd_bind
 
         return bind_func(("bind", self._w), sequence, func, add)
