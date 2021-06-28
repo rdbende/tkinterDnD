@@ -232,3 +232,4 @@ class DnDWrapper:
         self.tk.call("tkdnd::SetDropFileTempDirectory", tempdir)
 
     tk.BaseWidget.set_dropfile_tempdir = set_dropfile_tempdir
+
