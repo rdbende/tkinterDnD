@@ -99,6 +99,7 @@ class DnDWrapper:
     tk.BaseWidget._substitute_dnd = _substitute_dnd
 
     def _dnd_bind(self, what, sequence, func, add, needcleanup=True):
+        """The method, that does the actual binding"""
         if isinstance(func, str):
             self.tk.call(what + (sequence, func))
         elif func:
@@ -125,8 +126,9 @@ class DnDWrapper:
         Original tkdnd events:
 
         <<Drop>>
-        <<Drop:DND_Files>>
+        <<Drop:*>>
         <<Drop:DND_Text>>
+        <<Drop:DND_Files>>
         <<Drop:DND_Color>>
         <<DragInitCmd>>
         <<DragEndCmd>>
@@ -135,11 +137,11 @@ class DnDWrapper:
         <<DropPosition>>
 
         Simple and clear tkinterDnD events:
-
-        <<Drop:File>>
-        <<Drop:Text>>
-        <<Drop:Color>>
+        
         <<Drop:Any>>
+        <<Drop:Text>>
+        <<Drop:File>>
+        <<Drop:Color>>
         <<DragStart>>
         <<DragEnd>>
         <<DragEnter>>
@@ -148,18 +150,18 @@ class DnDWrapper:
         """
 
         bind_func = self._bind
-        if sequence in {"<<DropEnter>>", "<<DropPosition>>",
-                        "<<DropLeave>>", "<<Drop>>", "<<Drop:DND_Files>>",
-                        "<<Drop:DND_Text>>", "<<Drop:DND_Color>>",
-                        "<<DragInitCmd>>", "<<DragEndCmd>>", "<<Drop:File>>",
-                        "<<Drop:Text>>", "<<Drop:Color>>", "<<Drop:Any>>",
+        if sequence in {"<<Drop>>", "<<Drop:*>>", "<<Drop:DND_Text>>",
+                        "<<Drop:DND_Files>>", "<<Drop:DND_Color>>",
+                        "<<DragInitCmd>>", "<<DragEndCmd>>", "<<DropEnter>>",
+                        "<<DropLeave>>", "<<DropPosition>>", "<<Drop:Any>>",
+                        "<<Drop:Text>>", "<<Drop:File>>", "<<Drop:Color>>",
                         "<<DragStart>>", "<<DragEnd>>", "<<DragEnter>>",
-                        "<<DragLeave>>", "<<DragMove>>", "<<DragCursorFeedback>>"}:
-
-            if sequence == "<<Drop:File>>":
-                sequence = "<<Drop:DND_Files>>"
-            elif sequence == "<<Drop:Text>>":
+                        "<<DragLeave>>", "<<DragMove>>"}:
+            
+            if sequence == "<<Drop:Text>>":
                 sequence = "<<Drop:DND_Text>>"
+            elif sequence == "<<Drop:File>>":
+                sequence = "<<Drop:DND_Files>>"
             elif sequence == "<<Drop:Color>>":
                 sequence = "<<Drop:DND_Color>>"
             elif sequence == "<<Drop:Any>>":
@@ -173,7 +175,7 @@ class DnDWrapper:
             elif sequence == "<<DropLeave>>":
                 sequence = "<<DropLeave>>"
             elif sequence == "<<DragMove>>":
-                sequence = "<<DropPosotion>>"
+                sequence = "<<DropPosition>>"
 
             bind_func = self._dnd_bind
 
@@ -181,17 +183,14 @@ class DnDWrapper:
 
     tk.BaseWidget.bind = dnd_bind
 
-    def register_drag_source(self, button=None, *dndtypes):
+    def register_drag_source(self, dndtypes="*", button=1):
         """Registers the widget as drag source"""
-        if button is None:
-            button = 1
-        else:
-            try:
-                button = int(button)
-            except ValueError:
-                dndtypes = (button, ) + dndtypes
-                button = 1
-
+        if type(button) != int:
+            raise TypeError("Mouse button number must be an integer between 1 and 3")
+            
+        if button > 3:
+            raise ValueError(f"Invalid mouse button number: '{button}'")
+        
         self.tk.call("tkdnd::drag_source", "register", self._w, dndtypes, button)
 
     tk.BaseWidget.register_drag_source = register_drag_source
@@ -202,8 +201,8 @@ class DnDWrapper:
 
     tk.BaseWidget.unregister_drag_source = unregister_drag_source
 
-    def register_drop_target(self, *dndtypes):
-        """Registers the widget as drop target"""
+    def register_drop_target(self, dndtypes="*"):
+        """Registers the widget as drop target"""        
         self.tk.call("tkdnd::drop_target", "register", self._w, dndtypes)
 
     tk.BaseWidget.register_drop_target = register_drop_target
