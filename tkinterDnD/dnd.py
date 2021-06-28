@@ -9,8 +9,8 @@ import tkinter as tk
 
 class DnDEvent:
     """
-    Container for the properties of a drag-and-drop event, similar to a normal tk.Event.
-    An instance of the DnDEvent class has the following attributes:
+    Container for the properties of a DnD event, similar to a normal tk.Event.
+    A DnDEvent instance has the following attributes:
 
         action: string
         actions: tuple
