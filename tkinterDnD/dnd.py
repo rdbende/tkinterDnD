@@ -9,8 +9,8 @@ import tkinter as tk
 
 class DnDEvent:
     """
-    Container for the properties of a drag-and-drop event, similar to a normal tk.Event.
-    An instance of the DnDEvent class has the following attributes:
+    Container for the properties of a DnD event, similar to a normal tk.Event.
+    A DnDEvent instance has the following attributes:
 
         action: string
         actions: tuple
@@ -99,6 +99,7 @@ class DnDWrapper:
     tk.BaseWidget._substitute_dnd = _substitute_dnd
 
     def _dnd_bind(self, what, sequence, func, add, needcleanup=True):
+        """The method, that does the actual binding"""
         if isinstance(func, str):
             self.tk.call(what + (sequence, func))
         elif func:
@@ -125,8 +126,9 @@ class DnDWrapper:
         Original tkdnd events:
 
         <<Drop>>
-        <<Drop:DND_Files>>
+        <<Drop:*>>
         <<Drop:DND_Text>>
+        <<Drop:DND_Files>>
         <<Drop:DND_Color>>
         <<DragInitCmd>>
         <<DragEndCmd>>
@@ -135,11 +137,11 @@ class DnDWrapper:
         <<DropPosition>>
 
         Simple and clear tkinterDnD events:
-
-        <<Drop:File>>
-        <<Drop:Text>>
-        <<Drop:Color>>
+        
         <<Drop:Any>>
+        <<Drop:Text>>
+        <<Drop:File>>
+        <<Drop:Color>>
         <<DragStart>>
         <<DragEnd>>
         <<DragEnter>>
@@ -148,13 +150,13 @@ class DnDWrapper:
         """
 
         bind_func = self._bind
-        if sequence in {"<<DropEnter>>", "<<DropPosition>>",
-                        "<<DropLeave>>", "<<Drop>>", "<<Drop:DND_Files>>",
-                        "<<Drop:DND_Text>>", "<<Drop:DND_Color>>",
-                        "<<DragInitCmd>>", "<<DragEndCmd>>", "<<Drop:File>>",
-                        "<<Drop:Text>>", "<<Drop:Color>>", "<<Drop:Any>>",
+        if sequence in {"<<Drop>>", "<<Drop:*>>", "<<Drop:DND_Text>>",
+                        "<<Drop:DND_Files>>", "<<Drop:DND_Color>>",
+                        "<<DragInitCmd>>", "<<DragEndCmd>>", "<<DropEnter>>",
+                        "<<DropLeave>>", "<<DropPosition>>", "<<Drop:Any>>",
+                        "<<Drop:Text>>", "<<Drop:File>>", "<<Drop:Color>>",
                         "<<DragStart>>", "<<DragEnd>>", "<<DragEnter>>",
-                        "<<DragLeave>>", "<<DragMove>>", "<<DragCursorFeedback>>"}:
+                        "<<DragLeave>>", "<<DragMove>>"}:
 
             if sequence == "<<Drop:File>>":
                 sequence = "<<Drop:DND_Files>>"
