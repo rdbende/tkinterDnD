@@ -83,7 +83,7 @@ Constant name | Description | Actual value
 `LINK` | Used when DnD action is link. Useful, if you don't want either copy or move a file, instead create a shortcut for it. | link
 `ASK` | Used when DnD action is ask. The drop target can decide, what action to happen. | ask
 `PRIVATE` | Used when DnD action is private. The drop can only happen inside the tkinter window. | private
-`REFUSE_DROP` | Used when DnD action is refuse_drop. Use it, when the drag action should be refused right after it starts (when the init function is returned this action) | refuse_drop
+`REFUSE_DROP` | Used when DnD action is refuse_drop. Use it, when the drag action should be refused right after it starts (when the init function is returned this action), or if the widget don't want to accept a drop. | refuse_drop
 
 <a name="dnd_types_constants"></a>
 ### DnD types
