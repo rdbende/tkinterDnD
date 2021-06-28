@@ -157,15 +157,8 @@ class DnDWrapper:
                         "<<Drop:Text>>", "<<Drop:File>>", "<<Drop:Color>>",
                         "<<DragStart>>", "<<DragEnd>>", "<<DragEnter>>",
                         "<<DragLeave>>", "<<DragMove>>"}:
-<<<<<<< HEAD
             
             if sequence == "<<Drop:Text>>":
-=======
-
-            if sequence == "<<Drop:File>>":
-                sequence = "<<Drop:DND_Files>>"
-            elif sequence == "<<Drop:Text>>":
->>>>>>> 8a07ee049e4068f954c70fdd270e36807914c201
                 sequence = "<<Drop:DND_Text>>"
             elif sequence == "<<Drop:File>>":
                 sequence = "<<Drop:DND_Files>>"
