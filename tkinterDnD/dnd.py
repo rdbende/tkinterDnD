@@ -157,11 +157,11 @@ class DnDWrapper:
                         "<<Drop:Text>>", "<<Drop:File>>", "<<Drop:Color>>",
                         "<<DragStart>>", "<<DragEnd>>", "<<DragEnter>>",
                         "<<DragLeave>>", "<<DragMove>>"}:
-
-            if sequence == "<<Drop:File>>":
-                sequence = "<<Drop:DND_Files>>"
-            elif sequence == "<<Drop:Text>>":
+            
+            if sequence == "<<Drop:Text>>":
                 sequence = "<<Drop:DND_Text>>"
+            elif sequence == "<<Drop:File>>":
+                sequence = "<<Drop:DND_Files>>"
             elif sequence == "<<Drop:Color>>":
                 sequence = "<<Drop:DND_Color>>"
             elif sequence == "<<Drop:Any>>":
@@ -175,7 +175,7 @@ class DnDWrapper:
             elif sequence == "<<DropLeave>>":
                 sequence = "<<DropLeave>>"
             elif sequence == "<<DragMove>>":
-                sequence = "<<DropPosotion>>"
+                sequence = "<<DropPosition>>"
 
             bind_func = self._dnd_bind
 
@@ -183,17 +183,14 @@ class DnDWrapper:
 
     tk.BaseWidget.bind = dnd_bind
 
-    def register_drag_source(self, button=None, *dndtypes):
+    def register_drag_source(self, dndtypes="*", button=1):
         """Registers the widget as drag source"""
-        if button is None:
-            button = 1
-        else:
-            try:
-                button = int(button)
-            except ValueError:
-                dndtypes = (button, ) + dndtypes
-                button = 1
-
+        if type(button) != int:
+            raise TypeError("Mouse button number must be an integer between 1 and 3")
+            
+        if button > 3:
+            raise ValueError(f"Invalid mouse button number: '{button}'")
+        
         self.tk.call("tkdnd::drag_source", "register", self._w, dndtypes, button)
 
     tk.BaseWidget.register_drag_source = register_drag_source
@@ -204,8 +201,8 @@ class DnDWrapper:
 
     tk.BaseWidget.unregister_drag_source = unregister_drag_source
 
-    def register_drop_target(self, *dndtypes):
-        """Registers the widget as drop target"""
+    def register_drop_target(self, dndtypes="*"):
+        """Registers the widget as drop target"""        
         self.tk.call("tkdnd::drop_target", "register", self._w, dndtypes)
 
     tk.BaseWidget.register_drop_target = register_drop_target
@@ -235,3 +232,4 @@ class DnDWrapper:
         self.tk.call("tkdnd::SetDropFileTempDirectory", tempdir)
 
     tk.BaseWidget.set_dropfile_tempdir = set_dropfile_tempdir
+
