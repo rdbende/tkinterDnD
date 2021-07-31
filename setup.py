@@ -17,7 +17,7 @@ setup(
     url="https://github.com/rdbende/tkinterDnD",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    install_requires=["ttkwidgets >= 0.11.0"],
+    install_requires=["ttkwidgets >= 0.12.0"],
     python_requires=">=3.6",
     license="MIT license",
     classifiers=[
