@@ -1,6 +1,7 @@
 # tkinterDnD documentation
 
 ### Note: It seems like color drag-n-drop don't work on Windows
+### Note: It seems like text drag-n-drop don't work with KDE Plasma
 
 
 <br>
