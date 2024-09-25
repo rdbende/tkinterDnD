@@ -1,0 +1,24 @@
+[build-system]
+requires = ["scikit-build-core"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "tkdnd"
+version = "0.14.0"
+description = "DnD support for Tkinter"
+author = "The tkdnd authors"
+url = "https://github.com/rdbende/tktkinterDnD"
+
+[tool.cibuildwheel]
+skip = ["cp36-*", "cp37-*", "cp38-*", "pp*"]
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y tcl-devel tk-devel"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = "apk add tcl-dev tk-dev"
+
+[tool.cibuildwheel.macos]
+# https://github.com/actions/runner-images/issues/9441#issuecomment-1976928303
+before-all = "brew install tcl-tk"
