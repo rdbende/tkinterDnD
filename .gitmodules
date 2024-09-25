@@ -1,0 +1,3 @@
+[submodule "tkdnd"]
+	path = tkdnd
+	url = https://github.com/petasis/tkdnd
