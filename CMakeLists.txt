@@ -50,7 +50,16 @@ find_package(TclStub REQUIRED)
 # ===========================================================================
 #configure_file(tkdnd/generic/tkImgSVG.c
 #               ${CMAKE_CURRENT_BINARY_DIR}/tkImgSVG.c)
-add_library(tkdnd SHARED ${CMAKE_CURRENT_BINARY_DIR}/tkdnd)
+#add_library(tkdnd SHARED ${CMAKE_CURRENT_BINARY_DIR}/tkdnd)
+
+file(GLOB tkdnd_SRC
+     "tkdnd/*.h"
+     "tkdnd/*.cpp"
+     "tkdnd/*.c"
+)
+
+add_library(tkdnd SHARED ${tkdnd_SRC})
+
 target_link_libraries(tkdnd PRIVATE ${TCL_STUB_LIBRARY})
 target_link_libraries(tkdnd PRIVATE ${TK_STUB_LIBRARY})
 
